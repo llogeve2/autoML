@@ -1,5 +1,4 @@
 
-
 from pathlib import Path
 
 import pandas as pd
@@ -23,6 +22,7 @@ class Preprocessor:
         self.y = None
         self.feature_types = None
         self.separator = None
+        self.preprocessor = None
 
     def load_types(self):
         """Charge les types, un par ligne."""
@@ -43,11 +43,9 @@ class Preprocessor:
             raise ValueError(f"Types inconnus : {unknown}")
 
     def detect_separator(self):
-        """Cherche le séparateur compatible avec .type."""
+        """Détecte le séparateur à partir du nombre de features."""
 
         expected_features = len(self.feature_types)
-
-        # Les candidats à tester
         separators = [",", ";", "\t", "|", r"\s+"]
 
         matches = []
@@ -63,7 +61,6 @@ class Preprocessor:
                 )
 
                 n_features = sample.shape[1]
-
                 print(f"sep={sep!r} -> {n_features} colonnes")
 
                 if n_features == expected_features:
@@ -80,15 +77,14 @@ class Preprocessor:
 
         if len(matches) > 1:
             raise ValueError(
-                f"Détection ambiguë : {matches}. "
-                "Il faut examiner le fichier."
+                f"Détection ambiguë : {matches}"
             )
 
         self.separator = matches[0]
         return self.separator
 
     def load_data(self):
-        """Charge les features, types et targets."""
+        """Charge les features, leurs types et les targets."""
 
         self.load_types()
         sep = self.detect_separator()
@@ -118,99 +114,51 @@ class Preprocessor:
 
         return self.X, self.y
 
-	def build_preprocessor(self):
+    def build_preprocessor(self):
+        """Construit le pipeline selon les types déclarés."""
 
-		if self.feature_types is None:
-			raise ValueError("Les types de features ne sont pas chargés.")
+        if self.X is None or self.feature_types is None:
+            raise ValueError(
+                "Appelle load_data() avant de construire "
+                "le préprocesseur."
+            )
 
-		if len(self.feature_types) != X.shape[1]:
-			raise ValueError(
-				f"{len(self.feature_types)} types détectés, "
-				f"mais {X.shape[1]} features présentes."
-			)
+        X = self.X
+        types = self.feature_types
 
-		types = self.feature_types
+        if len(types) != X.shape[1]:
+            raise ValueError(
+                f"{len(types)} types détectés, "
+                f"mais {X.shape[1]} features présentes."
+            )
 
-		numeric_cols = [
-			X.columns[i]
-			for i, t in enumerate(types)
-			if t == "numerical"
-		]
+        numeric_cols = [
+            X.columns[i]
+            for i, t in enumerate(types)
+            if t == "numerical"
+        ]
 
-		categorical_cols = [
-			X.columns[i]
-			for i, t in enumerate(types)
-			if t == "categorical"
-		]
+        categorical_cols = [
+            X.columns[i]
+            for i, t in enumerate(types)
+            if t == "categorical"
+        ]
 
-		unknown_types = set(types) - {"numerical", "categorical"}
+        numeric_pipeline = Pipeline([
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", StandardScaler())
+        ])
 
-		if unknown_types:
-			raise ValueError(f"Types inconnus : {unknown_types}")
+        categorical_pipeline = Pipeline([
+            ("imputer", SimpleImputer(strategy="most_frequent")),
+            ("encoder", OneHotEncoder(
+                handle_unknown="ignore"
+            ))
+        ])
 
-		numeric_pipeline = Pipeline([
-			("imputer", SimpleImputer(strategy="median")),
-			("scaler", StandardScaler())
-		])
+        self.preprocessor = ColumnTransformer([
+            ("numeric", numeric_pipeline, numeric_cols),
+            ("categorical", categorical_pipeline, categorical_cols)
+        ], remainder="drop")
 
-		categorical_pipeline = Pipeline([
-			("imputer", SimpleImputer(strategy="most_frequent")),
-			("encoder", OneHotEncoder(handle_unknown="ignore"))
-		])
-
-		self.preprocessor = ColumnTransformer([
-			("numeric", numeric_pipeline, numeric_cols),
-			("categorical", categorical_pipeline, categorical_cols)
-		], remainder="drop")
-
-		return self.preprocessor
-
-
-from preprocessor import Preprocessor
-
-
-def main():
-    # Initialisation
-    preprocessor = Preprocessor("/info/corpus/ChallengeMachineLearning/data_A/")
-
-    try:
-        # Chargement des données
-        X, y = preprocessor.load_data()
-
-        print("\n=== Chargement réussi ===")
-        print(f"Séparateur détecté : {preprocessor.separator!r}")
-        print(f"Nombre d'observations : {X.shape[0]}")
-        print(f"Nombre de features : {X.shape[1]}")
-        print(f"Nombre de targets : {y.shape[1]}")
-
-        # Vérification des types
-        print("\n=== Types des features ===")
-        print(preprocessor.feature_types.value_counts())
-
-        # Aperçu des données
-        print("\n=== Aperçu de X ===")
-        print(X.head())
-
-        print("\n=== Aperçu de y ===")
-        print(y.head())
-
-        # Construction du préprocesseur
-        pipeline = preprocessor.build_preprocessor(X)
-
-        print("\n=== Préprocesseur construit ===")
-        print(pipeline)
-
-        # Test réel des transformations
-        X_transformed = pipeline.fit_transform(X)
-
-        print("\n=== Transformation réussie ===")
-        print(f"Dimensions après transformation : {X_transformed.shape}")
-
-    except Exception as e:
-        print(f"\nErreur pendant le test : {e}")
-        raise
-
-
-if __name__ == "__main__":
-    main()
-
+        return self.preprocessor
