@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
@@ -172,11 +173,6 @@ class Preprocessor:
                 f"{len(self.X)} lignes et y en contient {len(self.y)}."
             )
 
-        print(f"Séparateur de X : {self.data_separator!r}")
-        print(f"Séparateur de y : {self.solution_separator!r}")
-        print(f"Nombre de features : {self.X.shape[1]}")
-        print(f"Nombre de targets : {self.y.shape[1]}")
-
         return self.X, self.y
 
     def build_preprocessor(self):
@@ -214,3 +210,88 @@ class Preprocessor:
         ])
 
         return self.preprocessor
+
+    def detect_task_type(self, override=None):
+        """
+        Détermine le type de tâche à partir de la cible y.
+
+        Types possibles :
+        - binary_classification
+        - multiclass_classification
+        - multilabel_classification
+        - regression
+        - multioutput_regression
+        - multioutput_classification
+
+        override permet de forcer explicitement le type de tâche
+        lorsque les données ne permettent pas de le déduire.
+        """
+        if self.y is None:
+            raise ValueError(
+                "Il faut appeler load_data() avant detect_task_type()."
+            )
+
+        allowed_tasks = {
+            "binary_classification",
+            "multiclass_classification",
+            "multilabel_classification",
+            "regression",
+            "multioutput_regression",
+            "multioutput_classification"
+        }
+
+        if override is not None:
+            if override not in allowed_tasks:
+                raise ValueError(
+                    f"Tâche inconnue : {override}. "
+                    f"Valeurs possibles : {sorted(allowed_tasks)}"
+                )
+            return override
+
+        y = self.y.copy()
+
+        # Tentative de conversion de toutes les colonnes en numérique
+        numeric_y = y.apply(pd.to_numeric, errors="coerce")
+        all_numeric = numeric_y.notna().all().all()
+
+        # Plusieurs colonnes binaires : classification multilabel
+        if y.shape[1] > 1:
+            if all_numeric:
+                values = set(np.unique(numeric_y.to_numpy()))
+                if values.issubset({0, 1}):
+                    return "multilabel_classification"
+
+            # Plusieurs sorties numériques : régression multivariée
+            if all_numeric:
+                return "multioutput_regression"
+
+            # Plusieurs sorties non numériques ou mixtes
+            return "multioutput_classification"
+
+        # Une seule colonne cible
+        target = y.iloc[:, 0]
+
+        # Une cible non numérique est considérée comme catégorielle
+        if not all_numeric:
+            return "binary_classification" if target.nunique() == 2 \
+                else "multiclass_classification"
+
+        values = numeric_y.iloc[:, 0]
+        n_classes = values.nunique()
+
+        # Cible binaire
+        if n_classes == 2:
+            return "binary_classification"
+
+        # Heuristique : peu de valeurs distinctes et entières
+        # -> cible probablement catégorielle
+        integer_valued = np.allclose(
+            values.to_numpy(),
+            np.round(values.to_numpy())
+        )
+
+        if integer_valued and n_classes < len(values):
+            return "multiclass_classification"
+
+        # Sinon, cible numérique continue
+        return "regression"

@@ -33,5 +33,8 @@ def main():
     print("\n=== Transformation réussie ===")
     print(f"Dimensions de X transformé : {X_transformed.shape}")
 
+    print("\n=== Prédiction du type de tâche sur le jeu de données ===")
+    print(f"-> {preprocessor.detect_task_type()}")
+
 if __name__ == "__main__":
     main()
