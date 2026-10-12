@@ -25,9 +25,7 @@ class Preprocessor:
 
         self.data_path = self.folder_path / f"{dataset_name}.data"
         self.type_path = self.folder_path / f"{dataset_name}.type"
-        self.solution_path = (
-            self.folder_path / f"{dataset_name}.solution"
-        )
+        self.solution_path = self.folder_path / f"{dataset_name}.solution"
 
         self.X = None
         self.y = None
