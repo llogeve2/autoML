@@ -165,3 +165,52 @@ class Preprocessor:
 
 		return self.preprocessor
 
+
+from preprocessor import Preprocessor
+
+
+def main():
+    # Initialisation
+    preprocessor = Preprocessor("/info/corpus/ChallengeMachineLearning/data_A/")
+
+    try:
+        # Chargement des données
+        X, y = preprocessor.load_data()
+
+        print("\n=== Chargement réussi ===")
+        print(f"Séparateur détecté : {preprocessor.separator!r}")
+        print(f"Nombre d'observations : {X.shape[0]}")
+        print(f"Nombre de features : {X.shape[1]}")
+        print(f"Nombre de targets : {y.shape[1]}")
+
+        # Vérification des types
+        print("\n=== Types des features ===")
+        print(preprocessor.feature_types.value_counts())
+
+        # Aperçu des données
+        print("\n=== Aperçu de X ===")
+        print(X.head())
+
+        print("\n=== Aperçu de y ===")
+        print(y.head())
+
+        # Construction du préprocesseur
+        pipeline = preprocessor.build_preprocessor(X)
+
+        print("\n=== Préprocesseur construit ===")
+        print(pipeline)
+
+        # Test réel des transformations
+        X_transformed = pipeline.fit_transform(X)
+
+        print("\n=== Transformation réussie ===")
+        print(f"Dimensions après transformation : {X_transformed.shape}")
+
+    except Exception as e:
+        print(f"\nErreur pendant le test : {e}")
+        raise
+
+
+if __name__ == "__main__":
+    main()
+
