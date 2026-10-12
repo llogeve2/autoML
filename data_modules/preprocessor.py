@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import numpy as np
+from time import perf_counter
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
@@ -132,14 +133,19 @@ class Preprocessor:
         return candidates[0][0]
 
     def load_data(self):
-        self.load_types()
+        start = perf_counter()
 
-        # Détection du séparateur des features
+        self.load_types()
+        print(f"Lecture des types : {perf_counter() - start:.2f} s")
+
+        t = perf_counter()
         self.data_separator = self.detect_separator(
             self.data_path,
             expected_columns=len(self.feature_types)
         )
+        print(f"Détection du séparateur X : {perf_counter() - t:.2f} s")
 
+        t = perf_counter()
         self.X = pd.read_csv(
             self.data_path,
             sep=self.data_separator,
@@ -147,18 +153,15 @@ class Preprocessor:
             engine="python",
             skip_blank_lines=True
         )
+        print(f"Lecture de X : {perf_counter() - t:.2f} s")
 
-        if self.X.shape[1] != len(self.feature_types):
-            raise ValueError(
-                f"{self.X.shape[1]} features chargées, mais "
-                f"{len(self.feature_types)} types déclarés."
-            )
-
-        # Détection indépendante du séparateur des targets
+        t = perf_counter()
         self.solution_separator = self.detect_separator(
             self.solution_path
         )
+        print(f"Détection du séparateur y : {perf_counter() - t:.2f} s")
 
+        t = perf_counter()
         self.y = pd.read_csv(
             self.solution_path,
             sep=self.solution_separator,
@@ -166,12 +169,15 @@ class Preprocessor:
             engine="python",
             skip_blank_lines=True
         )
+        print(f"Lecture de y : {perf_counter() - t:.2f} s")
 
         if len(self.X) != len(self.y):
             raise ValueError(
-                f"Nombre de lignes différent : X contient "
-                f"{len(self.X)} lignes et y en contient {len(self.y)}."
+                f"X contient {len(self.X)} lignes, "
+                f"mais y en contient {len(self.y)}."
             )
+
+        print(f"Temps total de chargement : {perf_counter() - start:.2f} s")
 
         return self.X, self.y
 
