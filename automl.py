@@ -1,12 +1,11 @@
-import sklearn as sk 
 import numpy as np
+import sklearn as sk
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 
 class Automl():
     
     def __init__(self):
-        # 1. Utilisation d'une LISTE [...] au lieu d'un SET {...} pour pouvoir l'indexer
         self.list_model = [
             sk.linear_model.LinearRegression(),
             sk.linear_model.SGDRegressor(),
@@ -14,24 +13,24 @@ class Automl():
         ]
         self.type_methode = ["regression", "regression", "classification"]
 
-        # 2. Données factices valides pour tester .eval()
-        # On génère des données simples pour que .fit() fonctionne et évite la NotFittedError
-        X_dummy = np.array([[1, 2], [2, 3], [3, 4], [4, 5]])
-        y_reg_dummy = np.array([3, 5, 7, 9])
-        y_clf_dummy = np.array([0, 0, 1, 1])
+        X_dummy = np.array([
+            [1.5, 2.0], [2.0, 1.8], [1.0, 1.5], [2.5, 2.2],  # Groupe 1 (Classe 0)
+            [6.0, 6.5], [7.0, 8.0], [6.5, 7.2], [8.0, 7.5]   # Groupe 2 (Classe 1)
+        ])
+        
+        y_clf_dummy = np.array([0, 0, 0, 0, 1, 1, 1, 1])
 
-        # Entraînement rapide des modèles pour les besoins du test de .eval()
-        self.list_model[0].fit(X_dummy, y_reg_dummy)
-        self.list_model[1].fit(X_dummy, y_reg_dummy)
+        self.list_model[0].fit(X_dummy, y_clf_dummy)
+        self.list_model[1].fit(X_dummy, y_clf_dummy)
         self.list_model[2].fit(X_dummy, y_clf_dummy)
 
         self.Xtrain = X_dummy
         self.Xtest = X_dummy
         self.Xvalidation = X_dummy
 
-        self.Ytrain = y_reg_dummy
-        self.Ytest = y_reg_dummy # (Attention pour la classification, dans un vrai cas y_test serait discret)
-        self.Yvalidation = y_reg_dummy
+        self.Ytrain = y_clf_dummy
+        self.Ytest = y_clf_dummy
+        self.Yvalidation = y_clf_dummy
 
         self.colone_garder = []
 
@@ -57,20 +56,18 @@ class Automl():
                 self.best_estimator_name = model.__class__.__name__
                 self.rank = i
 
-        # 3. Correction : on prédit sur Xtest et non Ytest
         y_pred = self.best_estimator.predict(self.Xtest)
 
         if self.type_methode[self.rank] == "classification":
             class_report = classification_report(self.Ytest, y_pred, zero_division=0)
             conf_matrix = str(confusion_matrix(self.Ytest, y_pred))
-            report = class_report + "\n" + conf_matrix
+            report = "\n" + class_report + "\n" + conf_matrix
         else: 
             MAE = f"MAE  : {mean_absolute_error(self.Ytest, y_pred):.2f}\n"
             RMSE = f"RMSE : {np.sqrt(mean_squared_error(self.Ytest, y_pred)):.2f}\n"
             rCarre = f"R²   : {r2_score(self.Ytest, y_pred):.2f}"
             report = MAE + RMSE + rCarre
 
-        # 4. Correction : écriture de la variable 'report' globale (évite le NameError)
         with open("output.txt", "w") as f:
             f.write(report)
 
@@ -79,7 +76,7 @@ class Automl():
     def predict(self, path):
         pass
 
-# --- Pour tester directement ---
+
 if __name__ == "__main__":
     auto = Automl()
     best_model = auto.eval()
