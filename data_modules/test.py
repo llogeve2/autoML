@@ -1,4 +1,3 @@
-import argparse
 import numpy as np
 import pandas as pd
 
@@ -67,62 +66,50 @@ def evaluate_regression(y_test, y_pred):
             )
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Teste automatiquement une classification ou une régression."
+# Chargement
+preprocessor = Preprocessor("/info/corpus/ChallengeMachineLearning/data_A")
+X, y = preprocessor.load_data()
+
+# Détection de tâche par le Preprocessor
+task = preprocessor.detect_task_type()
+print(f"\n=== Type de tâche détecté : {task} ===")
+print(f"X : {X.shape}")
+print(f"y : {y.shape}")
+
+if task not in CLASSIFICATION_TASKS | REGRESSION_TASKS:
+    raise ValueError(f"Type de tâche non pris en charge : {task}")
+
+if task in REGRESSION_TASKS:
+    y = y.apply(pd.to_numeric, errors="raise").astype(float)
+
+# Une cible simple doit être une Series pour sklearn.
+if task in {"binary_classification", "multiclass_classification"}:
+    y_model = y.iloc[:, 0]
+else:
+    y_model = y
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y_model, test_size=0.2, random_state=42
+)
+
+preprocessing_pipeline = preprocessor.build_preprocessor()
+
+if task in CLASSIFICATION_TASKS:
+    estimator = RandomForestClassifier(
+        n_estimators=200, random_state=42, n_jobs=-1
     )
-    parser.add_argument(
-        "dataset_path",
-        nargs="?",
-        default="/info/corpus/ChallengeMachineLearning/data_A",
-        help="Dossier contenant <nom>.data, <nom>.type et <nom>.solution",
+    model_name = "RandomForestClassifier"
+else:
+    estimator = RandomForestRegressor(
+        n_estimators=200, random_state=42, n_jobs=-1
     )
-    args = parser.parse_args()
+    model_name = "RandomForestRegressor"
 
-    # Chargement
-    preprocessor = Preprocessor(args.dataset_path)
-    X, y = preprocessor.load_data()
+model = Pipeline([
+    ("preprocessing", preprocessing_pipeline),
+    ("model", estimator),
+])
 
-    # Détection de tâche par le Preprocessor
-    task = preprocessor.detect_task_type()
-    print(f"\n=== Type de tâche détecté : {task} ===")
-    print(f"X : {X.shape}")
-    print(f"y : {y.shape}")
-
-    if task not in CLASSIFICATION_TASKS | REGRESSION_TASKS:
-        raise ValueError(f"Type de tâche non pris en charge : {task}")
-
-    if task in REGRESSION_TASKS:
-        y = y.apply(pd.to_numeric, errors="raise").astype(float)
-
-    # Une cible simple doit être une Series pour sklearn.
-    if task in {"binary_classification", "multiclass_classification"}:
-        y_model = y.iloc[:, 0]
-    else:
-        y_model = y
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y_model, test_size=0.2, random_state=42
-    )
-
-    preprocessing_pipeline = preprocessor.build_preprocessor()
-
-    if task in CLASSIFICATION_TASKS:
-        estimator = RandomForestClassifier(
-            n_estimators=200, random_state=42, n_jobs=-1
-        )
-        model_name = "RandomForestClassifier"
-    else:
-        estimator = RandomForestRegressor(
-            n_estimators=200, random_state=42, n_jobs=-1
-        )
-        model_name = "RandomForestRegressor"
-
-    model = Pipeline([
-        ("preprocessing", preprocessing_pipeline),
-        ("model", estimator),
-    ])
-
-    print(f"\n=== Entraînement : {model_name} ===")
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+print(f"\n=== Entraînement : {model_name} ===")
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
