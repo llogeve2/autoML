@@ -113,3 +113,8 @@ model = Pipeline([
 print(f"\n=== Entraînement : {model_name} ===")
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
+
+if task in CLASSIFICATION_TASKS:
+    evaluate_classification(y_test, y_pred, task)
+else:
+    evaluate_regression(y_test, y_pred)
