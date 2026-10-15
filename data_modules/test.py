@@ -12,6 +12,8 @@ from sklearn.metrics import (
     r2_score,
 )
 
+from model_modules.model_selection import SEED, ModelSelector
+
 
 CLASSIFICATION_TASKS = {
     "binary_classification",
@@ -65,6 +67,24 @@ def evaluate_regression(y_test, y_pred):
                 f"R²={r2_score(y_true[:, i], y_pred[:, i]):.4f}"
             )
 
+def test(task, X, y, preprocessor):
+    print(f"\n===== {task} =====")
+
+    # On garde 20 % des données pour vérifier le modèle choisi
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
+
+    selector = ModelSelector(task, preprocessor)
+    selector.fit(X_train, y_train)
+
+    # Score du meilleur modèle sur les données de test
+    #score = selector.best_model.score(X_test, selector.prepare_y(y_test))
+    #print(f"Score sur le test : {score:.4f}")
+    
+    if task in CLASSIFICATION_TASKS:
+        evaluate_classification(y_test, selector.predict(X_test), task)
+    else:
+        evaluate_regression(y_test, selector.predict(X_test))
+
 
 # Chargement
 letters = ['A','B','C','D','E','F'] # AJOUTER LES LETTRES SI D'AUTRES DATASETS SONT DISPOS
@@ -84,42 +104,4 @@ for letter in letters:
     if task not in CLASSIFICATION_TASKS | REGRESSION_TASKS:
         raise ValueError(f"Type de tâche non pris en charge : {task}")
 
-    if task in REGRESSION_TASKS:
-        y = y.apply(pd.to_numeric, errors="raise").astype(float)
-
-    # Une cible simple doit être une Series pour sklearn.
-    if task in {"binary_classification", "multiclass_classification"}:
-        y_model = y.iloc[:, 0]
-    else:
-        y_model = y
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y_model, test_size=0.2, random_state=42
-    )
-
-    preprocessing_pipeline = preprocessor.build_preprocessor()
-
-    if task in CLASSIFICATION_TASKS:
-        estimator = RandomForestClassifier(
-            n_estimators=200, random_state=42, n_jobs=-1
-        )
-        model_name = "RandomForestClassifier"
-    else:
-        estimator = RandomForestRegressor(
-            n_estimators=200, random_state=42, n_jobs=-1
-        )
-        model_name = "RandomForestRegressor"
-
-    model = Pipeline([
-        ("preprocessing", preprocessing_pipeline),
-        ("model", estimator),
-    ])
-
-    print(f"\n=== Entraînement : {model_name} ===")
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-
-    if task in CLASSIFICATION_TASKS:
-        evaluate_classification(y_test, y_pred, task)
-    else:
-        evaluate_regression(y_test, y_pred)
+    test(task, X, y, preprocessor.build_preprocessor())
