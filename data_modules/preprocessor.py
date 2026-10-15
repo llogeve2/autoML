@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from scipy.sparse import csr_matrix
 
-def load_sparse_data(self, path):
+def load_sparse_data(path):
     rows, cols, values = [], [], []
     n_rows = 0
     max_col = -1
@@ -41,8 +41,17 @@ def load_sparse_data(self, path):
     if n_rows == 0:
         raise ValueError("Le fichier sparse est vide.")
 
-    # Les indices sparse commencent généralement à 1.
-    # On conserve ici les indices tels quels.
+    min_col = min(cols)
+
+    if min_col == 1:
+        cols = [col - 1 for col in cols]
+        max_col -= 1
+    elif min_col != 0:
+        raise ValueError(
+            f"Les indices sparse doivent commencer à 0 ou à 1, "
+            f"mais le minimum trouvé est {min_col}."
+        )
+
     return csr_matrix(
         (values, (rows, cols)),
         shape=(n_rows, max_col + 1),
@@ -228,7 +237,7 @@ class Preprocessor:
             self.data_separator = "sparse"
             print(f"Détection du séparateur X (sparce): {perf_counter() - t:.2f} s")
             t = perf_counter()
-            self.X = self.load_sparse_data(self.data_path)
+            self.X = load_sparse_data(self.data_path)
         else:
             self.data_separator = self.detect_separator(
                 self.data_path,
@@ -262,7 +271,7 @@ class Preprocessor:
         )
         print(f"Lecture de y : {perf_counter() - t:.2f} s")
 
-        if len(self.X) != len(self.y):
+        if self.X.shape[0] != len(self.y):
             raise ValueError(
                 f"X contient {len(self.X)} lignes, "
                 f"mais y en contient {len(self.y)}."
@@ -282,13 +291,13 @@ class Preprocessor:
             )
 
         numerical_columns = [
-            self.X.columns[i]
+            i
             for i, t in enumerate(self.feature_types)
             if t == "numerical"
         ]
 
         categorical_columns = [
-            self.X.columns[i]
+            i
             for i, t in enumerate(self.feature_types)
             if t in ["categorical", "binary"]
         ]

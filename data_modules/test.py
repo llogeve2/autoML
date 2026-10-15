@@ -69,7 +69,7 @@ def evaluate_regression(y_test, y_pred):
 # Chargement
 letters = ['A','B','C','D','E','F']
 
-for letter in letters
+for letter in letters:
     preprocessor = Preprocessor("/info/corpus/ChallengeMachineLearning/data_" + letter)
     X, y = preprocessor.load_data()
 
