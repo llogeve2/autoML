@@ -67,9 +67,11 @@ def evaluate_regression(y_test, y_pred):
 
 
 # Chargement
-letters = ['A','B','C','D','E','F']
+letters = ['A','B','C','D','E','F'] # AJOUTER LES LETTRES SI D'AUTRES DATASETS SONT DISPOS
 
 for letter in letters:
+    print(f"\n =========================== DATASET {letter} ===========================\n\n")
+
     preprocessor = Preprocessor("/info/corpus/ChallengeMachineLearning/data_" + letter)
     X, y = preprocessor.load_data()
 

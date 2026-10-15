@@ -7,7 +7,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, issparse
 
 def load_sparse_data(path):
     rows, cols, values = [], [], []
@@ -304,7 +304,7 @@ class Preprocessor:
 
         numerical_pipeline = Pipeline([
             ("imputer", SimpleImputer(strategy="median")),
-            ("scaler", StandardScaler())
+            ("scaler", StandardScaler(with_mean=not issparse(self.X)))
         ])
 
         categorical_pipeline = Pipeline([
