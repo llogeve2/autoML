@@ -43,7 +43,7 @@ class Preprocessor:
             names=["type"]
         )["type"].str.strip().str.lower()
 
-        allowed_types = {"numerical", "categorical"}
+        allowed_types = {"numerical", "categorical", "binary"}
 
         if self.feature_types.empty:
             raise ValueError("Le fichier .type est vide.")
@@ -132,6 +132,26 @@ class Preprocessor:
 
         return candidates[0][0]
 
+    def decode_one_hot_target(self):
+        """Convertit une cible one-hot en une seule colonne de classes."""
+        if self.y.shape[1] <= 1:
+            return
+
+        values = self.y.apply(pd.to_numeric, errors="coerce")
+
+        if values.isna().any().any():
+            return
+
+        if not values.isin([0, 1]).all().all():
+            return
+
+        if not values.sum(axis=1).eq(1).all():
+            return
+
+        self.y = pd.DataFrame({
+            "target": values.to_numpy().argmax(axis=1)
+        })
+
     def load_data(self):
         start = perf_counter()
 
@@ -179,6 +199,8 @@ class Preprocessor:
 
         print(f"Temps total de chargement : {perf_counter() - start:.2f} s")
 
+        self.decode_one_hot_target()
+
         return self.X, self.y
 
     def build_preprocessor(self):
@@ -197,7 +219,7 @@ class Preprocessor:
         categorical_columns = [
             self.X.columns[i]
             for i, t in enumerate(self.feature_types)
-            if t == "categorical"
+            if t in ["categorical", "binary"]
         ]
 
         numerical_pipeline = Pipeline([
@@ -289,14 +311,7 @@ class Preprocessor:
         if n_classes == 2:
             return "binary_classification"
 
-        # Heuristique : peu de valeurs distinctes et entières
-        # -> cible probablement catégorielle
-        integer_valued = np.allclose(
-            values.to_numpy(),
-            np.round(values.to_numpy())
-        )
-
-        if integer_valued and n_classes < (len(values) / 2):
+        if n_classes > 0.5 * len(values):
             return "multiclass_classification"
 
         # Sinon, cible numérique continue
