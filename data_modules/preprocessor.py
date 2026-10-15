@@ -296,7 +296,7 @@ class Preprocessor:
             np.round(values.to_numpy())
         )
 
-        if integer_valued and n_classes < len(values):
+        if integer_valued and n_classes < (len(values) / 2):
             return "multiclass_classification"
 
         # Sinon, cible numérique continue
