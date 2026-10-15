@@ -7,7 +7,47 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from scipy.sparse import csr_matrix
 
+def load_sparse_data(self, path):
+    rows, cols, values = [], [], []
+    n_rows = 0
+    max_col = -1
+
+    with open(path, "r") as f:
+        for i, line in enumerate(f):
+            items = line.split()
+
+            if not items:
+                continue
+
+            n_rows += 1
+            row = n_rows - 1
+
+            for item in items:
+                col, value = item.split(":", 1)
+                col = int(col)
+
+                if col < 0:
+                    raise ValueError(
+                        f"Indice de colonne négatif : {col}"
+                    )
+
+                rows.append(row)
+                cols.append(col)
+                values.append(float(value))
+                max_col = max(max_col, col)
+
+    if n_rows == 0:
+        raise ValueError("Le fichier sparse est vide.")
+
+    # Les indices sparse commencent généralement à 1.
+    # On conserve ici les indices tels quels.
+    return csr_matrix(
+        (values, (rows, cols)),
+        shape=(n_rows, max_col + 1),
+        dtype=np.float64
+    )
 
 class Preprocessor:
 
@@ -152,6 +192,31 @@ class Preprocessor:
             "target": values.to_numpy().argmax(axis=1)
         })
 
+    def is_sparse_file(self, path, n_lines=5):
+        with open(path, "r") as f:
+            checked = 0
+
+            for line in f:
+                if not line.strip():
+                    continue
+
+                items = line.split()
+
+                # Toutes les valeurs doivent être de la forme indice:valeur
+                try:
+                    for item in items:
+                        col, value = item.split(":", 1)
+                        int(col)
+                        float(value)
+                except ValueError:
+                    return False
+
+                checked += 1
+                if checked >= n_lines:
+                    break
+
+        return checked > 0
+
     def load_data(self):
         start = perf_counter()
 
@@ -159,20 +224,26 @@ class Preprocessor:
         print(f"Lecture des types : {perf_counter() - start:.2f} s")
 
         t = perf_counter()
-        self.data_separator = self.detect_separator(
-            self.data_path,
-            expected_columns=len(self.feature_types)
-        )
-        print(f"Détection du séparateur X : {perf_counter() - t:.2f} s")
+        if self.is_sparse_file(self.data_path):
+            self.data_separator = "sparse"
+            print(f"Détection du séparateur X (sparce): {perf_counter() - t:.2f} s")
+            t = perf_counter()
+            self.X = self.load_sparse_data(self.data_path)
+        else:
+            self.data_separator = self.detect_separator(
+                self.data_path,
+                expected_columns=len(self.feature_types)
+            )
+            print(f"Détection du séparateur X : {perf_counter() - t:.2f} s")
+            t = perf_counter()
 
-        t = perf_counter()
-        self.X = pd.read_csv(
-            self.data_path,
-            sep=self.data_separator,
-            header=None,
-            engine="python",
-            skip_blank_lines=True
-        )
+            self.X = pd.read_csv(
+                self.data_path,
+                sep=self.data_separator,
+                header=None,
+                engine="python",
+                skip_blank_lines=True
+            )
         print(f"Lecture de X : {perf_counter() - t:.2f} s")
 
         t = perf_counter()
@@ -304,15 +375,40 @@ class Preprocessor:
             return "binary_classification" if target.nunique() == 2 \
                 else "multiclass_classification"
 
-        values = numeric_y.iloc[:, 0]
+        values = numeric_y.iloc[:, 0].dropna()
+        n_samples = len(values)
         n_classes = values.nunique()
+
+        if n_classes <= 1:
+            # Cible constante : choix par défaut
+            return "regression"
 
         # Cible binaire
         if n_classes == 2:
             return "binary_classification"
 
-        if n_classes > 0.5 * len(values):
+        # Indices statistiques
+        integer_target = np.allclose(
+            values.to_numpy(),
+            np.round(values.to_numpy())
+        )
+
+        cardinality_ratio = n_classes / n_samples
+
+        # Seuil adaptatif selon la taille du dataset
+        max_classes = min(
+            50,
+            max(10, int(np.sqrt(n_samples)))
+        )
+
+        # Classification multiclasse probable :
+        # cible entière, cardinalité limitée et valeurs répétées
+        if (
+            integer_target
+            and n_classes <= max_classes
+            and cardinality_ratio <= 0.05
+        ):
             return "multiclass_classification"
 
-        # Sinon, cible numérique continue
+        # Par défaut : régression
         return "regression"
