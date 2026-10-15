@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from preprocessor import Preprocessor
+from data_modules.preprocessor import Preprocessor
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.pipeline import Pipeline
