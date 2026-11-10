@@ -251,7 +251,7 @@ class Preprocessor:
                 engine="pyarrow",
                 skip_blank_lines=True
             )
-            if has_trailing_separator(self.solution_path, self.solution_separator):
+            if has_trailing_separator(self.data_path, self.data_separator):
                 self.X = self.X.iloc[:, :-1]
         print(f"Lecture de X : {perf_counter() - t:.2f} s")
 
@@ -269,7 +269,7 @@ class Preprocessor:
             engine="pyarrow",
             skip_blank_lines=True
         )
-        if has_trailing_separator(self.data_path, self.data_separator):
+        if has_trailing_separator(self.solution_path, self.solution_separator):
             self.y = self.y.iloc[:, :-1]
         print(f"Lecture de y : {perf_counter() - t:.2f} s")
 
