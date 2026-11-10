@@ -124,7 +124,7 @@ class Preprocessor:
                     sep=sep,
                     header=None,
                     nrows=10,
-                    engine="python",
+                    engine="c",
                     dtype=str,
                     skip_blank_lines=True
                 )
@@ -250,7 +250,7 @@ class Preprocessor:
                 self.data_path,
                 sep=self.data_separator,
                 header=None,
-                engine="python",
+                engine="c",
                 skip_blank_lines=True
             )
         print(f"Lecture de X : {perf_counter() - t:.2f} s")
