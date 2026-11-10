@@ -233,7 +233,7 @@ class Preprocessor:
         t = perf_counter()
         if self.is_sparse_file(self.data_path):
             self.data_separator = "sparse"
-            print(f"Détection du séparateur X (sparce): {perf_counter() - t:.2f} s")
+            print(f"Détection du séparateur X (sparse): {perf_counter() - t:.2f} s")
             t = perf_counter()
             self.X = load_sparse_data(self.data_path)
         else:
@@ -251,7 +251,7 @@ class Preprocessor:
                 engine="pyarrow",
                 skip_blank_lines=True
             )
-            if has_trailing_separator(self.data_path, self.data_separator):
+            if self.data_separator != "sparse" and has_trailing_separator(self.data_path, self.data_separator):
                 self.X = self.X.iloc[:, :-1]
         print(f"Lecture de X : {perf_counter() - t:.2f} s")
 
