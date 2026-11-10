@@ -60,7 +60,7 @@ def load_sparse_data(path):
 
 class Preprocessor:
 
-    SEPARATORS = [",", ";", "\t", "|", r"\s+"]
+    SEPARATORS = [",", ";", "\t", "|", " "]#, r"\s+"]
 
     def __init__(self, folder_path):
         # Le chemin fourni désigne un dossier, par exemple data_A/
@@ -124,7 +124,7 @@ class Preprocessor:
                     sep=sep,
                     header=None,
                     nrows=10,
-                    engine="c",
+                    engine="pyarrow",
                     dtype=str,
                     skip_blank_lines=True
                 )
@@ -250,7 +250,7 @@ class Preprocessor:
                 self.data_path,
                 sep=self.data_separator,
                 header=None,
-                engine="c",
+                engine="pyarrow",
                 skip_blank_lines=True
             )
         print(f"Lecture de X : {perf_counter() - t:.2f} s")
