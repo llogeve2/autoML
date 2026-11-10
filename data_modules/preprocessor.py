@@ -133,7 +133,7 @@ class Preprocessor:
                     sep=sep,
                     header=None,
                     nrows=10,
-                    engine="pyarrow",
+                    engine="c",
                     dtype=str,
                     skip_blank_lines=True
                 )
@@ -143,7 +143,7 @@ class Preprocessor:
                     continue
 
                 if has_trailing_separator(file_path, sep):
-                    self.X = self.X.iloc[:, :-1]
+                    sample = sample.iloc[:, :-1]
 
                 n_columns = sample.shape[1]
                 print(f"  -> Nombre de colonnes : {n_columns}")
@@ -269,9 +269,14 @@ class Preprocessor:
         print(f"Lecture de X : {perf_counter() - t:.2f} s")
 
         t = perf_counter()
+        """
         self.solution_separator = self.detect_separator(
             self.solution_path
         )
+        """
+        self.solution_separator = self.data_separator
+        if self.solution_separator == " ":
+            self.solution_separator = r"\s+"
         print(f"Détection du séparateur y : {perf_counter() - t:.2f} s")
 
         t = perf_counter()
