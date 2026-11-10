@@ -179,18 +179,27 @@ class Preprocessor:
             )
 
         if expected_columns is not None:
-            candidates.sort(
-                key=lambda candidate: (
-                    candidate[1],
-                    self.SEPARATORS.index(candidate[0])
-                ),
-                reverse=True
-            )
+            # Sélection du séparateur correspondant au nombre de colonnes attendu
+            candidates = [
+                c for c in candidates if c[1] == expected_columns
+            ]
 
-            print(f"Séparateur sélectionné : {repr(candidates[0][0])}")
-            print(f"{'='*60}\n")
+            if not candidates:
+                raise ValueError(
+                    f"Aucun séparateur ne produit {expected_columns} colonnes."
+                )
 
-            return candidates[0][0]
+            selected = candidates[0]
+
+        else:
+            # Sélection du séparateur produisant le plus de colonnes
+            selected = max(candidates, key=lambda c: c[1])
+
+        print(f"Séparateur sélectionné : {repr(selected[0])}")
+        print(f"Nombre de colonnes : {selected[1]}")
+        print(f"{'='*60}\n")
+
+        return selected[0]
 
     def decode_one_hot_target(self):
         """Convertit une cible one-hot en une seule colonne de classes."""
@@ -269,14 +278,9 @@ class Preprocessor:
         print(f"Lecture de X : {perf_counter() - t:.2f} s")
 
         t = perf_counter()
-        """
         self.solution_separator = self.detect_separator(
             self.solution_path
         )
-        """
-        self.solution_separator = self.data_separator
-        if self.solution_separator == " ":
-            self.solution_separator = r"\s+"
         print(f"Détection du séparateur y : {perf_counter() - t:.2f} s")
 
         t = perf_counter()
@@ -284,9 +288,11 @@ class Preprocessor:
             self.solution_path,
             sep=self.solution_separator,
             header=None,
-            engine="c",
+            engine="pyarrow",
             skip_blank_lines=True
         )
+        if has_trailing_separator(self.data_path, self.data_separator):
+            self.y = self.y.iloc[:, :-1]
         print(f"Lecture de y : {perf_counter() - t:.2f} s")
 
         if self.X.shape[0] != len(self.y):
