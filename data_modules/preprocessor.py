@@ -115,81 +115,82 @@ class Preprocessor:
     def detect_separator(self, file_path, expected_columns=None):
         """
         Détecte le séparateur à partir des 10 premières lignes.
-
-        Si expected_columns est fourni, le nombre de colonnes
-        attendu permet de sélectionner le séparateur.
-
-        Sinon, on privilégie le découpage régulier donnant le
-        plus grand nombre de colonnes, notamment pour .solution.
         """
         candidates = []
 
+        print(f"\n{'='*60}")
+        print(f"Détection du séparateur : {file_path}")
+        print(f"Colonnes attendues : {expected_columns}")
+        print(f"Séparateurs testés : {self.SEPARATORS}")
+        print(f"{'='*60}")
+
         for sep in self.SEPARATORS:
+            print(f"\n[Test] Séparateur : {repr(sep)}")
+
             try:
                 sample = pd.read_csv(
                     file_path,
                     sep=sep,
                     header=None,
                     nrows=10,
-                    engine="c",
+                    engine="pyarrow",
                     dtype=str,
                     skip_blank_lines=True
                 )
 
                 if sample.empty:
+                    print("  -> Échantillon vide")
                     continue
 
                 if has_trailing_separator(file_path, sep):
-                    sample = sample.iloc[:, :-1]
+                    self.X = self.X.iloc[:, :-1]
 
                 n_columns = sample.shape[1]
+                print(f"  -> Nombre de colonnes : {n_columns}")
+                print(f"  -> Nombre de lignes : {len(sample)}")
 
-                # Vérification du nombre de colonnes attendu
+                # Affichage de la première ligne interprétée
+                print(f"  -> Première ligne : {sample.iloc[0].tolist()}")
+
                 if (
                     expected_columns is not None
                     and n_columns != expected_columns
                 ):
+                    print(
+                        f"  -> REJET : {n_columns} colonnes "
+                        f"au lieu de {expected_columns}"
+                    )
                     continue
 
-                # On conserve les séparateurs qui donnent
-                # un nombre de colonnes cohérent sur l'échantillon.
+                print("  -> CANDIDAT RETENU")
                 candidates.append((sep, n_columns))
 
-            except (ValueError, pd.errors.ParserError):
+            except Exception as e:
+                print(f"  -> ERREUR : {type(e).__name__}: {e}")
                 continue
 
+        print(f"\n{'='*60}")
+        print(f"Candidats trouvés : {candidates}")
+
         if not candidates:
+            print("Aucun séparateur valide.")
             raise ValueError(
                 f"Aucun séparateur valide détecté pour {file_path}."
             )
 
-        # Pour .data, le nombre de colonnes est connu grâce à .type.
         if expected_columns is not None:
-            if len(candidates) > 1:
-                # Plusieurs séparateurs peuvent produire le même
-                # nombre de colonnes. On privilégie le découpage
-                # le plus fin seulement si nécessaire.
-                candidates.sort(
-                    key=lambda candidate: (
-                        candidate[1],
-                        self.SEPARATORS.index(candidate[0])
-                    ),
-                    reverse=True
-                )
+            candidates.sort(
+                key=lambda candidate: (
+                    candidate[1],
+                    self.SEPARATORS.index(candidate[0])
+                ),
+                reverse=True
+            )
+
+            print(f"Séparateur sélectionné : {repr(candidates[0][0])}")
+            print(f"{'='*60}\n")
 
             return candidates[0][0]
-
-        # Pour .solution, aucun nombre de colonnes n'est connu :
-        # on privilégie le découpage régulier le plus fin.
-        candidates.sort(
-            key=lambda candidate: (
-                candidate[1],
-                self.SEPARATORS.index(candidate[0])
-            ),
-            reverse=True
-        )
-
-        return candidates[0][0]
 
     def decode_one_hot_target(self):
         """Convertit une cible one-hot en une seule colonne de classes."""
