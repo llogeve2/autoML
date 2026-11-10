@@ -118,14 +118,7 @@ class Preprocessor:
         """
         candidates = []
 
-        print(f"\n{'='*60}")
-        print(f"Détection du séparateur : {file_path}")
-        print(f"Colonnes attendues : {expected_columns}")
-        print(f"Séparateurs testés : {self.SEPARATORS}")
-        print(f"{'='*60}")
-
         for sep in self.SEPARATORS:
-            print(f"\n[Test] Séparateur : {repr(sep)}")
 
             try:
                 sample = pd.read_csv(
@@ -139,41 +132,28 @@ class Preprocessor:
                 )
 
                 if sample.empty:
-                    print("  -> Échantillon vide")
                     continue
 
                 if has_trailing_separator(file_path, sep):
                     sample = sample.iloc[:, :-1]
 
                 n_columns = sample.shape[1]
-                print(f"  -> Nombre de colonnes : {n_columns}")
-                print(f"  -> Nombre de lignes : {len(sample)}")
 
                 # Affichage de la première ligne interprétée
-                print(f"  -> Première ligne : {sample.iloc[0].tolist()}")
 
                 if (
                     expected_columns is not None
                     and n_columns != expected_columns
                 ):
-                    print(
-                        f"  -> REJET : {n_columns} colonnes "
-                        f"au lieu de {expected_columns}"
-                    )
                     continue
 
-                print("  -> CANDIDAT RETENU")
                 candidates.append((sep, n_columns))
 
             except Exception as e:
                 print(f"  -> ERREUR : {type(e).__name__}: {e}")
                 continue
 
-        print(f"\n{'='*60}")
-        print(f"Candidats trouvés : {candidates}")
-
         if not candidates:
-            print("Aucun séparateur valide.")
             raise ValueError(
                 f"Aucun séparateur valide détecté pour {file_path}."
             )
@@ -196,8 +176,6 @@ class Preprocessor:
             selected = max(candidates, key=lambda c: c[1])
 
         print(f"Séparateur sélectionné : {repr(selected[0])}")
-        print(f"Nombre de colonnes : {selected[1]}")
-        print(f"{'='*60}\n")
 
         return selected[0]
 
@@ -273,7 +251,7 @@ class Preprocessor:
                 engine="pyarrow",
                 skip_blank_lines=True
             )
-            if has_trailing_separator(self.data_path, self.data_separator):
+            if has_trailing_separator(self.solution_path, self.solution_separator):
                 self.X = self.X.iloc[:, :-1]
         print(f"Lecture de X : {perf_counter() - t:.2f} s")
 
