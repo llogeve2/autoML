@@ -48,19 +48,6 @@ class Models:
                 max_iter=2000,
                 random_state=self.random_state
             ),
-            """
-            'Linear SVM': LinearSVC(
-                C=1.0,
-                max_iter=1000,
-                random_state=self.random_state
-            ),"""
-            "SGD Classifier": SGDClassifier(
-                loss="log_loss",
-                alpha=0.0001,
-                max_iter=2000,
-                tol=1e-3,
-                random_state=self.random_state
-            ),
             "Random Forest": RandomForestClassifier(
                 n_estimators=300,
                 min_samples_leaf=2,
