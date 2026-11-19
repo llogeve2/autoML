@@ -50,7 +50,7 @@ class Models:
             ),
             "Linear SVM": LinearSVC(
                 C=1.0,
-                max_iter=5000,
+                max_iter=1000,
                 random_state=self.random_state
             ),
             "SGD Classifier": SGDClassifier(
