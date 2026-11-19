@@ -21,6 +21,8 @@ from sklearn.model_selection import cross_val_score
 from sklearn.multioutput import MultiOutputClassifier, MultiOutputRegressor
 from sklearn.pipeline import Pipeline
 
+import Models
+
 
 # Graine aléatoire fixée pour que les résultats soient reproductibles
 SEED = 42
@@ -50,7 +52,8 @@ class ModelSelector:
         self.best_model = None  # pipeline (prétraitement + meilleur modèle) entraîné
 
     def get_models(self):
-        """Renvoie un dictionnaire {nom: modèle} adapté au type de tâche."""
+        """
+        #Renvoie un dictionnaire {nom: modèle} adapté au type de tâche.
         if self.is_classification:
             models = {
                 "LogisticRegression": LogisticRegression(max_iter=1000, random_state=SEED),
@@ -68,6 +71,9 @@ class ModelSelector:
             if self.multi_target:
                 models["SGDRegressor"] = MultiOutputRegressor(models["SGDRegressor"])
         return models
+        """
+        selector = Models(random_state=SEED, n_jobs=N_JOBS)
+        return selector.get_models(self.task)
 
     def prepare_y(self, y):
         """Met la cible y au bon format pour scikit-learn."""
@@ -94,6 +100,8 @@ class ModelSelector:
                 ("preprocessing", self.preprocessor),
                 ("model", model),
             ])
+
+            print("Entrainement sur le modele " + name)
 
             # Validation croisée en 5 parties
             scores = cross_val_score(pipeline, X, y, cv=5, scoring=scoring, n_jobs=N_JOBS)
