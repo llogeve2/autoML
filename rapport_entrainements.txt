@@ -1,0 +1,269 @@
+ =========================== DATASET A ===========================
+
+
+Lecture des types : 0.01 s
+Séparateur sélectionné : ' '
+Détection du séparateur X : 0.05 s
+Lecture de X : 0.02 s
+Séparateur sélectionné : ' '
+Détection du séparateur y : 0.04 s
+Lecture de y : 0.01 s
+Temps total de chargement : 0.13 s
+
+=== Type de tâche détecté : multilabel_classification ===
+X : (34190, 24)
+y : (34190, 3)
+
+===== multilabel_classification =====
+Entrainement sur le modele OneVsRest Logistic Regression
+OneVsRest Logistic Regression accuracy = 0.6138 (+/- 0.0045)
+Temps écoulé : 3.21
+Entrainement sur le modele Random Forest
+Random Forest        accuracy = 0.6097 (+/- 0.0056)
+Temps écoulé : 93.57
+Entrainement sur le modele Extra Trees
+Extra Trees          accuracy = 0.5870 (+/- 0.0035)
+Temps écoulé : 86.77
+Meilleur modèle : OneVsRest Logistic Regression
+
+--- Rapport pour 0 ---
+              precision    recall  f1-score   support
+
+           0       0.86      0.18      0.29      1010
+           1       0.87      1.00      0.93      5828
+
+    accuracy                           0.87      6838
+   macro avg       0.87      0.59      0.61      6838
+weighted avg       0.87      0.87      0.84      6838
+
+
+--- Rapport pour 1 ---
+              precision    recall  f1-score   support
+
+           0       0.74      0.81      0.77      2278
+           1       0.90      0.86      0.88      4560
+
+    accuracy                           0.84      6838
+   macro avg       0.82      0.83      0.83      6838
+weighted avg       0.85      0.84      0.84      6838
+
+
+--- Rapport pour 2 ---
+              precision    recall  f1-score   support
+
+           0       0.71      0.57      0.64      1605
+           1       0.88      0.93      0.90      5233
+
+    accuracy                           0.85      6838
+   macro avg       0.80      0.75      0.77      6838
+weighted avg       0.84      0.85      0.84      6838
+
+
+ =========================== DATASET B ===========================
+
+
+Lecture des types : 0.00 s
+Séparateur sélectionné : ' '
+Détection du séparateur X : 0.01 s
+Lecture de X : 0.01 s
+Séparateur sélectionné : ','
+Détection du séparateur y : 0.01 s
+Lecture de y : 0.00 s
+Temps total de chargement : 0.04 s
+
+=== Type de tâche détecté : regression ===
+X : (5000, 16)
+y : (5000, 1)
+
+===== regression =====
+Entrainement sur le modele Ridge Regression
+Ridge Regression     r2 = 0.6514 (+/- 0.0197)
+Temps écoulé : 0.10
+Entrainement sur le modele SGD Regressor
+SGD Regressor        r2 = 0.6502 (+/- 0.0191)
+Temps écoulé : 0.18
+Entrainement sur le modele Random Forest
+Random Forest        r2 = 0.7426 (+/- 0.0117)
+Temps écoulé : 31.09
+Entrainement sur le modele Extra Trees
+Extra Trees          r2 = 0.7088 (+/- 0.0155)
+Temps écoulé : 13.13
+Entrainement sur le modele Linear Regression
+Linear Regression    r2 = 0.6514 (+/- 0.0198)
+Temps écoulé : 0.10
+Meilleur modèle : Random Forest
+MAE  : 40469.9380
+RMSE : 58832.2452
+R²   : 0.7334
+
+ =========================== DATASET C ===========================
+
+
+Lecture des types : 0.00 s
+Séparateur sélectionné : ' '
+Détection du séparateur X : 0.29 s
+Lecture de X : 0.74 s
+Séparateur sélectionné : ' '
+Détection du séparateur y : 0.02 s
+Lecture de y : 0.01 s
+Temps total de chargement : 1.07 s
+
+=== Type de tâche détecté : multiclass_classification ===
+X : (15000, 1568)
+y : (15000, 1)
+
+===== multiclass_classification =====
+Entrainement sur le modele Logistic Regression
+Logistic Regression  accuracy = 0.8635 (+/- 0.0036)
+Temps écoulé : 16.21
+Entrainement sur le modele Random Forest
+Random Forest        accuracy = 0.9426 (+/- 0.0032)
+Temps écoulé : 203.71
+Entrainement sur le modele Extra Trees
+Extra Trees          accuracy = 0.9519 (+/- 0.0013)
+Temps écoulé : 114.22
+Meilleur modèle : Extra Trees
+              precision    recall  f1-score   support
+
+           0       0.98      0.98      0.98       291
+           1       0.98      0.98      0.98       326
+           2       0.95      0.97      0.96       320
+           3       0.94      0.91      0.92       308
+           4       0.96      0.96      0.96       294
+           5       0.96      0.94      0.95       265
+           6       0.96      0.98      0.97       279
+           7       0.97      0.95      0.96       321
+           8       0.93      0.95      0.94       299
+           9       0.92      0.95      0.93       297
+
+    accuracy                           0.95      3000
+   macro avg       0.95      0.95      0.95      3000
+weighted avg       0.95      0.95      0.95      3000
+
+
+ =========================== DATASET D ===========================
+
+
+Lecture des types : 0.00 s
+Séparateur sélectionné : ' '
+Détection du séparateur X : 0.02 s
+Lecture de X : 0.02 s
+Séparateur sélectionné : ','
+Détection du séparateur y : 0.01 s
+Lecture de y : 0.00 s
+Temps total de chargement : 0.05 s
+
+=== Type de tâche détecté : binary_classification ===
+X : (2984, 144)
+y : (2984, 1)
+
+===== binary_classification =====
+Entrainement sur le modele Logistic Regression
+Logistic Regression  accuracy = 0.7863 (+/- 0.0155)
+Temps écoulé : 1.52
+Entrainement sur le modele Random Forest
+Random Forest        accuracy = 0.8119 (+/- 0.0119)
+Temps écoulé : 5.81
+Entrainement sur le modele Extra Trees
+Extra Trees          accuracy = 0.8081 (+/- 0.0141)
+Temps écoulé : 7.70
+Meilleur modèle : Random Forest
+              precision    recall  f1-score   support
+
+           0       0.91      0.68      0.78       288
+           1       0.76      0.94      0.84       309
+
+    accuracy                           0.81       597
+   macro avg       0.83      0.81      0.81       597
+weighted avg       0.83      0.81      0.81       597
+
+
+ =========================== DATASET E ===========================
+
+
+Lecture des types : 0.00 s
+Séparateur sélectionné : ' '
+Détection du séparateur X : 0.03 s
+Lecture de X : 0.02 s
+Séparateur sélectionné : ','
+Détection du séparateur y : 0.01 s
+Lecture de y : 0.00 s
+Temps total de chargement : 0.07 s
+
+=== Type de tâche détecté : binary_classification ===
+X : (3140, 259)
+y : (3140, 1)
+
+===== binary_classification =====
+Entrainement sur le modele Logistic Regression
+Logistic Regression  accuracy = 0.5573 (+/- 0.0247)
+Temps écoulé : 0.46
+Entrainement sur le modele Random Forest
+Random Forest        accuracy = 0.7619 (+/- 0.0156)
+Temps écoulé : 18.16
+Entrainement sur le modele Extra Trees
+Extra Trees          accuracy = 0.7102 (+/- 0.0147)
+Temps écoulé : 8.74
+Meilleur modèle : Random Forest
+              precision    recall  f1-score   support
+
+           0       0.74      0.83      0.78       302
+           1       0.82      0.73      0.77       326
+
+    accuracy                           0.78       628
+   macro avg       0.78      0.78      0.78       628
+weighted avg       0.78      0.78      0.78       628
+
+
+ =========================== DATASET F ===========================
+
+
+Lecture des types : 0.06 s
+Détection du séparateur X (sparse): 0.00 s
+Lecture de X : 1.67 s
+Séparateur sélectionné : ' '
+Détection du séparateur y : 0.02 s
+Lecture de y : 0.01 s
+Temps total de chargement : 1.76 s
+
+=== Type de tâche détecté : multiclass_classification ===
+X : (13142, 61188)
+y : (13142, 1)
+
+===== multiclass_classification =====
+Entrainement sur le modele Logistic Regression
+Logistic Regression  accuracy = 0.7820 (+/- 0.0028)
+Temps écoulé : 145.74
+Entrainement sur le modele Random Forest
+Random Forest        accuracy = 0.7029 (+/- 0.0061)
+Temps écoulé : 39.59
+Entrainement sur le modele Extra Trees
+Extra Trees          accuracy = 0.6705 (+/- 0.0087)
+Temps écoulé : 39.61
+Meilleur modèle : Logistic Regression
+              precision    recall  f1-score   support
+
+           0       0.90      0.83      0.86       127
+           1       0.63      0.76      0.69       130
+           2       0.74      0.70      0.72       138
+           3       0.73      0.66      0.69       137
+           4       0.74      0.80      0.77       132
+           5       0.78      0.78      0.78       122
+           6       0.68      0.81      0.74       139
+           7       0.81      0.77      0.79       150
+           8       0.94      0.82      0.88       112
+           9       0.90      0.90      0.90       124
+          10       0.87      0.93      0.90       149
+          11       0.89      0.89      0.89       159
+          12       0.71      0.72      0.71       131
+          13       0.87      0.78      0.82       141
+          14       0.91      0.86      0.88       155
+          15       0.80      0.83      0.82       150
+          16       0.90      0.85      0.88       122
+          17       0.92      0.92      0.92       131
+          18       0.73      0.83      0.78        99
+          19       0.79      0.70      0.75        81
+
+    accuracy                           0.81      2629
+   macro avg       0.81      0.81      0.81      2629
+weighted avg       0.81      0.81      0.81      2629
