@@ -34,9 +34,8 @@ class Models:
     de modèles avec des hyperparamètres prédéfinis.
     """
 
-    def __init__(self, random_state=42, n_jobs=1):
+    def __init__(self, random_state=42):
         self.random_state = random_state
-        self.n_jobs = n_jobs
 
     # --------------------------------------------------
     # Classification
@@ -64,13 +63,15 @@ class Models:
             "Random Forest": RandomForestClassifier(
                 n_estimators=300,
                 min_samples_leaf=2,
-                n_jobs=self.n_jobs,
+                n_jobs=1,
+                max_depth=15,
                 random_state=self.random_state
             ),
             "Extra Trees": ExtraTreesClassifier(
                 n_estimators=300,
                 min_samples_leaf=2,
-                n_jobs=self.n_jobs,
+                n_jobs=1,
+                max_depth=15,
                 random_state=self.random_state
             )
         }
@@ -88,18 +89,20 @@ class Models:
                     max_iter=2000,
                     random_state=self.random_state
                 ),
-                n_jobs=self.n_jobs
+                n_jobs=1
             ),
             "Random Forest": RandomForestClassifier(
                 n_estimators=300,
                 min_samples_leaf=2,
-                n_jobs=self.n_jobs,
+                n_jobs=1,
+                max_depth=15,
                 random_state=self.random_state
             ),
             "Extra Trees": ExtraTreesClassifier(
                 n_estimators=300,
                 min_samples_leaf=2,
-                n_jobs=self.n_jobs,
+                n_jobs=1,
+                max_depth=15,
                 random_state=self.random_state
             )
         }
@@ -117,18 +120,20 @@ class Models:
                     max_iter=2000,
                     random_state=self.random_state
                 ),
-                n_jobs=self.n_jobs
+                n_jobs=1
             ),
             "MultiOutput Random Forest": RandomForestClassifier(
                 n_estimators=300,
                 min_samples_leaf=2,
-                n_jobs=self.n_jobs,
+                n_jobs=1,
+                max_depth=15,
                 random_state=self.random_state
             ),
             "MultiOutput Extra Trees": ExtraTreesClassifier(
                 n_estimators=300,
                 min_samples_leaf=2,
-                n_jobs=self.n_jobs,
+                n_jobs=1,
+                max_depth=15,
                 random_state=self.random_state
             )
         }
@@ -152,13 +157,15 @@ class Models:
             "Random Forest": RandomForestRegressor(
                 n_estimators=300,
                 min_samples_leaf=2,
-                n_jobs=self.n_jobs,
+                n_jobs=1,
+                max_depth=15,
                 random_state=self.random_state
             ),
             "Extra Trees": ExtraTreesRegressor(
                 n_estimators=300,
                 min_samples_leaf=2,
-                n_jobs=self.n_jobs,
+                n_jobs=1,
+                max_depth=15,
                 random_state=self.random_state
             ),
             "Linear Regression": LinearRegression()
@@ -173,18 +180,20 @@ class Models:
         return {
             "MultiOutput Ridge": MultiOutputRegressor(
                 Ridge(alpha=1.0),
-                n_jobs=self.n_jobs
+                n_jobs=1
             ),
             "MultiOutput Random Forest": RandomForestRegressor(
                 n_estimators=300,
                 min_samples_leaf=2,
-                n_jobs=self.n_jobs,
+                n_jobs=1,
+                max_depth=15,
                 random_state=self.random_state
             ),
             "MultiOutput Extra Trees": ExtraTreesRegressor(
                 n_estimators=300,
                 min_samples_leaf=2,
-                n_jobs=self.n_jobs,
+                n_jobs=1,
+                max_depth=15,
                 random_state=self.random_state
             )
         }

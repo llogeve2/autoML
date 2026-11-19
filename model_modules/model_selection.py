@@ -21,7 +21,8 @@ from sklearn.model_selection import cross_val_score
 from sklearn.multioutput import MultiOutputClassifier, MultiOutputRegressor
 from sklearn.pipeline import Pipeline
 
-import Models
+from model_modules.models import Models
+from time import perf_counter
 
 
 # Graine aléatoire fixée pour que les résultats soient reproductibles
@@ -102,11 +103,13 @@ class ModelSelector:
             ])
 
             print("Entrainement sur le modele " + name)
+            start = perf_counter()
 
             # Validation croisée en 5 parties
             scores = cross_val_score(pipeline, X, y, cv=5, scoring=scoring, n_jobs=N_JOBS)
             self.scores[name] = scores.mean()
             print(f"{name:20s} {scoring} = {scores.mean():.4f} (+/- {scores.std():.4f})")
+            print(f"Temps écoulé : {perf_counter() - start:.2f}")
 
         # Le meilleur modèle est celui qui a le plus grand score moyen
         self.best_name = max(self.scores, key=self.scores.get)
