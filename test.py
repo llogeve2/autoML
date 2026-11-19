@@ -75,6 +75,7 @@ def test(task, X, y, preprocessor):
 
     selector = ModelSelector(task, preprocessor)
     selector.fit(X_train, y_train)
+    selector.tune(X_train, y_train)
 
     # Score du meilleur modèle sur les données de test
     #score = selector.best_model.score(X_test, selector.prepare_y(y_test))
